@@ -1,13 +1,9 @@
 package ro.pub.cs.systems.eim.practicaltest01;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,19 +19,10 @@ public class MainActivity extends AppCompatActivity {
 
     Button pressMe, pressMeToo, navigateToSecondaryActivity;
     EditText input1, input2;
-
     private ActivityResultLauncher<Intent> activityResultLauncher;
+    Button startService;
+    private ColocviuBroadcastReceiver colocviuBroadcastReceiver;
 
-    Button startService, stopService;
-
-
-    private final MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
-    private static class MessageBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(Constants.BROADCAST_RECEIVER_TAG, intent.getStringExtra(Constants.BROADCAST_RECEIVER_EXTRA));
-        }
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,10 +70,28 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, PracticalTest01Service.class);
             intent.putExtra(Constants.INPUT1, Integer.valueOf(input1.getText().toString()));
             intent.putExtra(Constants.INPUT2, Integer.valueOf(input1.getText().toString()));
-            startForegroundService(intent);
+            startService(intent);
         });
 
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        colocviuBroadcastReceiver = new ColocviuBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.ACTION_STRING);
+        registerReceiver(colocviuBroadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (colocviuBroadcastReceiver != null) {
+            unregisterReceiver(colocviuBroadcastReceiver);
+        }
     }
 
     @Override
@@ -95,24 +100,6 @@ public class MainActivity extends AppCompatActivity {
         outState.putString(Constants.INPUT1, input1.getText().toString());
         outState.putString(Constants.INPUT2, input2.getText().toString());
     }
-
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Constants.ACTION_STRING);
-        registerReceiver(messageBroadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED);
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(messageBroadcastReceiver);
-    }
-
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

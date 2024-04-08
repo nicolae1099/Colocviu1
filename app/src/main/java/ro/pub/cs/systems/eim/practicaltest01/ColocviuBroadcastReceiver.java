@@ -8,6 +8,7 @@ import android.util.Log;
 public class ColocviuBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("BroadcastReceiver", "onReceive() callback method has been invoked");
         String action = intent.getAction();
         if (action != null) {
             if (action.equals(Constants.ACTION_STRING)) {

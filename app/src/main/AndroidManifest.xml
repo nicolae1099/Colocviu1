@@ -33,7 +33,6 @@
             android:name=".PracticalTest01Service"
             android:foregroundServiceType="shortService" />
 
-        <receiver android:name=".ColocviuBroadcastReceiver" />
     </application>
 
 </manifest>
