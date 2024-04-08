@@ -1,9 +1,12 @@
 package ro.pub.cs.systems.eim.practicaltest01;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,13 +23,22 @@ public class MainActivity extends AppCompatActivity {
     Button pressMe, pressMeToo, navigateToSecondaryActivity;
     EditText input1, input2;
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    Button startService;
-    private ColocviuBroadcastReceiver colocviuBroadcastReceiver;
+    private final IntentFilter intentFilter = new IntentFilter();
 
+    private final MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
+    private static class MessageBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(Constants.BROADCAST_RECEIVER_TAG, Objects.requireNonNull(intent.getStringExtra(Constants.BROADCAST_RECEIVER_EXTRA)));
+        }
+    }
+
+    int leftNumber = 0;
+    int rightNumber = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_2);
+        setContentView(R.layout.activity_main);
 
         pressMe = findViewById(R.id.press_me_button);
         pressMeToo = findViewById(R.id.press_me_too_button);
@@ -39,15 +51,23 @@ public class MainActivity extends AppCompatActivity {
 
 
         pressMe.setOnClickListener(v -> {
-            input1.setText(String.valueOf(Integer.parseInt(input1.getText().toString()) + 1));
+            leftNumber++;
+            input1.setText(String.valueOf(leftNumber));
+            startServiceIfConditionIsMet(leftNumber, rightNumber);
         });
 
         pressMeToo.setOnClickListener(v -> {
-            input2.setText(String.valueOf(Integer.parseInt(input2.getText().toString()) + 1));
+            rightNumber++;
+            input2.setText(String.valueOf(rightNumber));
+
+            startServiceIfConditionIsMet(leftNumber, rightNumber);
         });
 
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
+                if (result.getData() == null) {
+                    return;
+                }
                 int sum = Objects.requireNonNull(result.getData().getExtras()).getInt(Constants.SUM);
                 Toast.makeText(this, "The activity returned with OK  " + sum, Toast.LENGTH_LONG).show();
             } else {
@@ -65,33 +85,45 @@ public class MainActivity extends AppCompatActivity {
             activityResultLauncher.launch(intent);
         });
 
-        startService = findViewById(R.id.startService);
-        startService.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, PracticalTest01Service.class);
-            intent.putExtra(Constants.INPUT1, Integer.valueOf(input1.getText().toString()));
-            intent.putExtra(Constants.INPUT2, Integer.valueOf(input1.getText().toString()));
-            startService(intent);
-        });
+        for (int index = 0; index < Constants.actionTypes.length; index++) {
+            intentFilter.addAction(Constants.actionTypes[index]);
+        }
 
+    }
+
+    private void startServiceIfConditionIsMet(int leftNumber, int rightNumber) {
+        if (leftNumber + rightNumber > Constants.NUMBER_OF_CLICKS_THRESHOLD) {
+            Intent intent = new Intent(getApplicationContext(), PracticalTest01Service.class);
+            intent.putExtra(Constants.INPUT1, leftNumber);
+            intent.putExtra(Constants.INPUT2, rightNumber);
+            getApplicationContext().startService(intent);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        colocviuBroadcastReceiver = new ColocviuBroadcastReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Constants.ACTION_STRING);
-        registerReceiver(colocviuBroadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(messageBroadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(messageBroadcastReceiver, intentFilter);
+        }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        unregisterReceiver(messageBroadcastReceiver);
+        super.onPause();
+    }
 
-        if (colocviuBroadcastReceiver != null) {
-            unregisterReceiver(colocviuBroadcastReceiver);
-        }
+
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this, PracticalTest01Service.class);
+        stopService(intent);
+
+        super.onDestroy();
     }
 
     @Override

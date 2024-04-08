@@ -2,20 +2,23 @@ package ro.pub.cs.systems.eim.practicaltest01;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+
+import java.util.Date;
+import java.util.Random;
 
 public class ProcessThread extends Thread{
 
-    private int sum;
-    private int medieAritmetica = 0;
-    private int medieGeometrica = 0;
     private boolean isRunning = true;
-    private Context context;
+    private final Context context;
+    private final Random random = new Random();
+    private final double arithmeticMean;
+    private final double geometricMean;
 
-    public ProcessThread(Context context, int input1, int input2) {
+    public ProcessThread(Context context, int firstNumber, int secondNumber) {
         this.context = context;
-        this.sum = input1 + input2;
-        this.medieAritmetica = (input1 + input2) / 2;
-        this.medieGeometrica = (int) Math.sqrt(input1 * input2);
+        arithmeticMean = (double) (firstNumber + secondNumber) / 2;
+        geometricMean = Math.sqrt(firstNumber * secondNumber);
     }
 
     @Override
@@ -30,16 +33,15 @@ public class ProcessThread extends Thread{
         try {
             Thread.sleep(Constants.SLEEP_TIME);
         } catch (InterruptedException interruptedException) {
-
+            Log.d("ProcessThread", "Thread has stopped!");
         }
     }
 
     private void sendMessage() {
         Intent intent = new Intent();
-        intent.setAction(Constants.ACTION_STRING);
-
-        String broadcast = "Suma: " + sum + " Medie Aritmetica: " + medieAritmetica + " Medie Geometrica: " + medieGeometrica;
-        intent.putExtra(Constants.BROADCAST_RECEIVER_EXTRA, broadcast);
+        intent.setAction(Constants.actionTypes[random.nextInt(Constants.actionTypes.length)]);
+        intent.putExtra(Constants.BROADCAST_RECEIVER_EXTRA,
+                new Date(System.currentTimeMillis()) + " " + arithmeticMean + " " + geometricMean);
         context.sendBroadcast(intent);
     }
 

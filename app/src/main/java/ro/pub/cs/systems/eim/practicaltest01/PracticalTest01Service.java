@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -47,7 +46,7 @@ public class PracticalTest01Service extends Service {
         Log.d("PracticalTest01Service", "onStartCommand() callback method was invoked");
 
         processingThread = new ProcessThread(PracticalTest01Service.this, intent.getIntExtra(Constants.INPUT1, 0), intent.getIntExtra(Constants.INPUT2, 0));
-        processingThread.run();
+        processingThread.start();
         return Service.START_REDELIVER_INTENT;
     }
 

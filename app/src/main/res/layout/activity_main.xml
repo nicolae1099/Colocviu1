@@ -12,7 +12,7 @@
         android:id="@+id/navigate_to_second_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Navigate to another activity"
+        android:text="@string/navigate_to_another_activity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,7 +34,9 @@
             android:inputType="text"
             android:enabled="false"
             android:saveEnabled="false"
-            android:text="0" />
+            android:text="@string/_0"
+            android:importantForAutofill="no"
+            tools:ignore="LabelFor" />
 
         <EditText
             android:id="@+id/input2"
@@ -44,7 +46,9 @@
             android:inputType="text"
             android:enabled="false"
             android:saveEnabled="false"
-            android:text="0" />
+            android:text="@string/_0"
+            android:importantForAutofill="no"
+            tools:ignore="LabelFor" />
 
     </LinearLayout>
 
@@ -54,7 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:text="Press me!"
+        android:text="@string/press_me"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
@@ -64,20 +68,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:text="Press me, too!"
+        android:text="@string/press_me_too"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
-
-    <Button
-        android:id="@+id/startService"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="112dp"
-        android:text="Start Service"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/press_me_button" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
